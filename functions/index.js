@@ -42,6 +42,7 @@ app.post('/uploadArtist', (req, res) => {
 			res.status(500).send(err);
 		});
 });
+
 app.post('/uploadalbum', (req, res) => {
 	db.collection('albums')
 		.doc()
@@ -60,14 +61,12 @@ app.post('/uploadalbum', (req, res) => {
 		});
 
 	const findIDfield = () => {
-		console.log('started lookging for doc');
 		db.collection('albums')
 			.get()
 			.then(snap => {
 				snap.forEach(doc => {
 					const data = doc.data();
 					if (data.id === undefined) {
-						console.log('found doc');
 						setIDflield(doc.id);
 					}
 				});
@@ -80,12 +79,25 @@ app.post('/uploadalbum', (req, res) => {
 
 	const setIDflield = docID => {
 		db.collection('albums')
-			.doc(doc.id)
+			.doc(docID)
 			.update({
-				id: doc.id,
+				id: docID,
 			})
+			.then(() => {
+				returnData(docID);
+
+				return;
+			})
+			.catch(err => {
+				res.status(500).send(err);
+			});
+	};
+
+	const returnData = docID => {
+		db.collection('albums')
+			.doc(docID)
+			.get()
 			.then(doc => {
-				console.log('added id to doc');
 				res.status(200).send(doc.data());
 				return;
 			})
