@@ -41,6 +41,39 @@ app.post('/uploadAlbumImage', (req, res) => {
 		});
 });
 
+app.post('/uploadAlbumImage', (req, res) => {
+	db.collection('albums')
+		.doc(req.body.currentAlbum)
+		.update({
+			album_cover: req.body.imgurl,
+		})
+		.then(() => {
+			res.status(200).send('success');
+			return;
+		})
+		.catch(err => {
+			res.status(500).send(err);
+		});
+});
+
+app.post('/uploadsong', (req, res) => {
+	db.collection('albums')
+		.doc(req.body.currentAlbum)
+		.collection('songs')
+		.doc()
+		.create({
+			songName: req.body.songName,
+			songUrl: req.body.songUrl,
+		})
+		.then(() => {
+			res.status(200).send('success');
+			return;
+		})
+		.catch(err => {
+			res.status(500).send(err);
+		});
+});
+
 //! use this end point for update as well
 app.post('/uploadArtist', (req, res) => {
 	db.collection('artists')
