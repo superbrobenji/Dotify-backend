@@ -25,6 +25,22 @@ app.post('/uploadArtistImage', (req, res) => {
 		});
 });
 
+//!use for update album image as well
+app.post('/uploadAlbumImage', (req, res) => {
+	db.collection('albums')
+		.doc(req.body.currentAlbum)
+		.update({
+			album_cover: req.body.imgurl,
+		})
+		.then(() => {
+			res.status(200).send('success');
+			return;
+		})
+		.catch(err => {
+			res.status(500).send(err);
+		});
+});
+
 //! use this end point for update as well
 app.post('/uploadArtist', (req, res) => {
 	db.collection('artists')
@@ -48,9 +64,12 @@ app.post('/uploadalbum', (req, res) => {
 		.doc()
 		.create({
 			album_name: req.body.albumData.albumName,
-			songCount: 0,
+			song_count: 0,
 			genre: req.body.albumData.genre,
 			artist: req.body.albumData.artist,
+			album_cover:
+				'https://firebasestorage.googleapis.com/v0/b/dotify-eb26e.appspot.com/o/placeholderImages%2Fdefault-album.png?alt=media&token=d5bf5d5a-d210-4bb6-bcf2-4c98fdc0d2e9',
+			artist_name: req.body.albumData.artistName,
 		})
 		.then(() => {
 			findIDfield();
@@ -98,7 +117,17 @@ app.post('/uploadalbum', (req, res) => {
 			.doc(docID)
 			.get()
 			.then(doc => {
-				res.status(200).send(doc.data());
+				const docData = doc.data();
+				const data = {
+					id: docData.id,
+					coverImage: docData.album_cover,
+					albumName: docData.album_name,
+					genre: docData.genre,
+					songCount: docData.song_count,
+					artist: docData.artist,
+					artistName: docData.artist_name,
+				};
+				res.status(200).send(data);
 				return;
 			})
 			.catch(err => {
@@ -128,6 +157,8 @@ app.get('/getuseralbums', (req, res) => {
 						albumName: data.album_name,
 						songCount: data.song_count,
 						genre: data.genre,
+						artist: data.artist,
+						artistName: data.artist_name,
 					};
 
 					albums.push(album);
@@ -135,6 +166,66 @@ app.get('/getuseralbums', (req, res) => {
 				if (i === snap.docs.length - 1) {
 					//	console.log(albums);
 					res.status(200).send(albums);
+				}
+				i++;
+			});
+			return;
+		})
+		.catch(err => {
+			res.status(500).send(err);
+		});
+});
+
+app.get('/getallalbums', (req, res) => {
+	let albums = [];
+
+	db.collection('albums')
+		.get()
+		.then(snap => {
+			let i = 0;
+			snap.forEach(doc => {
+				const data = doc.data();
+				const album = {
+					id: doc.id,
+					coverImage: data.album_cover,
+					albumName: data.album_name,
+					songCount: data.song_count,
+					genre: data.genre,
+					artist: data.artist,
+					artistName: data.artist_name,
+				};
+				albums.push(album);
+				if (i === snap.docs.length - 1) {
+					//	console.log(albums);
+					res.status(200).send(albums);
+				}
+				i++;
+			});
+			return;
+		})
+		.catch(err => {
+			res.status(500).send(err);
+		});
+});
+
+app.get('/getallartists', (req, res) => {
+	let artists = [];
+
+	db.collection('artists')
+		.get()
+		.then(snap => {
+			let i = 0;
+			snap.forEach(doc => {
+				const data = doc.data();
+				const artist = {
+					imageUrl: data.artist_image,
+					artistName: data.artist_name,
+					artistSurname: data.artist_surname,
+					uid: data.uID,
+				};
+				artists.push(artist);
+				if (i === snap.docs.length - 1) {
+					res.status(200).send(artists);
 				}
 				i++;
 			});
