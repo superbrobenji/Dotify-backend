@@ -73,12 +73,34 @@ app.post('/uploadalbum', (req, res) => {
 		})
 		.then(() => {
 			findIDfield();
+			uploadGenre();
 			return;
 		})
 		.catch(err => {
 			res.status(500).send(err);
 		});
 
+	const uploadGenre = () => {
+		db.collection('genres')
+			.doc('Kwp538DVPUTuhYJmVXlh')
+			.get()
+			.then(doc => {
+				if (
+					!doc.data().genres.includes(req.body.albumData.genre.toLowerCase())
+				) {
+					setGenre(doc.data().genres);
+				}
+				return;
+			})
+			.catch(err => {
+				res.status(500).send(err);
+			});
+	};
+	const setGenre = genres => {
+		db.collection('genres')
+			.doc('Kwp538DVPUTuhYJmVXlh')
+			.update({ genres: [...genres, req.body.albumData.genre.toLowerCase()] });
+	};
 	const findIDfield = () => {
 		db.collection('albums')
 			.get()
@@ -176,6 +198,56 @@ app.get('/getuseralbums', (req, res) => {
 		});
 });
 
+app.get('/getgenrealbums', (req, res) => {
+	let albums = [];
+
+	db.collection('albums')
+		.get()
+		.then(snap => {
+			let i = 0;
+			snap.forEach(doc => {
+				const data = doc.data();
+
+				//console.log(data.artist + ' ' + req.params.uid);
+				if (data.genre === req.query.genre) {
+					const album = {
+						id: doc.id,
+						coverImage: data.album_cover,
+						albumName: data.album_name,
+						songCount: data.song_count,
+						genre: data.genre,
+						artist: data.artist,
+						artistName: data.artist_name,
+					};
+
+					albums.push(album);
+				}
+				if (i === snap.docs.length - 1) {
+					//	console.log(albums);
+					res.status(200).send(albums);
+				}
+				i++;
+			});
+			return;
+		})
+		.catch(err => {
+			res.status(500).send(err);
+		});
+});
+
+app.get('/getallgenres', (req, res) => {
+	db.collection('genres')
+		.doc('Kwp538DVPUTuhYJmVXlh')
+		.get()
+		.then(snap => {
+			const genres = snap.data().genres;
+			res.status(200).send(genres);
+			return;
+		})
+		.catch(err => {
+			res.status(500).send(err);
+		});
+});
 app.get('/getallalbums', (req, res) => {
 	let albums = [];
 
