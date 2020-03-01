@@ -67,11 +67,33 @@ app.post('/uploadsong', (req, res) => {
 		})
 		.then(() => {
 			res.status(200).send('success');
+			getcount();
 			return;
 		})
 		.catch(err => {
 			res.status(500).send(err);
 		});
+	const getcount = () => {
+		db.collection('albums')
+			.doc(req.body.currentAlbum)
+			.get()
+			.then(album => {
+				const count = album.data().song_count;
+				addCount(count);
+				return;
+			})
+			.catch(err => {
+				res.status(500).send(err);
+			});
+	};
+
+	const addCount = count => {
+		db.collection('albums')
+			.doc(req.body.currentAlbum)
+			.update({
+				song_count: count++,
+			});
+	};
 });
 
 //! use this end point for update as well
