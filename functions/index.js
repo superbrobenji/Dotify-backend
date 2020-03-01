@@ -157,9 +157,6 @@ app.post('/uploadalbum', (req, res) => {
 			});
 	};
 });
-//app.put('/:id', (req, res) => res.send(Widgets.update(req.params.id, req.body)));
-//app.delete('/:id', (req, res) => res.send(Widgets.delete(req.params.id)));
-//app.get('/', (req, res) => res.send(Widgets.list()));
 
 app.get('/getuseralbums', (req, res) => {
 	let albums = [];
@@ -171,7 +168,6 @@ app.get('/getuseralbums', (req, res) => {
 			snap.forEach(doc => {
 				const data = doc.data();
 
-				//console.log(data.artist + ' ' + req.params.uid);
 				if (data.artist === req.query.uid) {
 					const album = {
 						id: doc.id,
@@ -186,8 +182,37 @@ app.get('/getuseralbums', (req, res) => {
 					albums.push(album);
 				}
 				if (i === snap.docs.length - 1) {
-					//	console.log(albums);
 					res.status(200).send(albums);
+				}
+				i++;
+			});
+			return;
+		})
+		.catch(err => {
+			res.status(500).send(err);
+		});
+});
+
+app.get('/getalbumsongs', (req, res) => {
+	let songs = [];
+
+	db.collection('albums')
+		.doc(req.query.currentAlbumID)
+		.collection('songs')
+		.get()
+		.then(snap => {
+			console.log('found list of songs');
+			let i = 0;
+			snap.forEach(doc => {
+				data = doc.data();
+				const song = {
+					songUrl: data.songUrl,
+					id: doc.id,
+					songName: data.songName,
+				};
+				songs.push(song);
+				if (i === snap.docs.length - 1) {
+					res.status(200).send(songs);
 				}
 				i++;
 			});
@@ -208,7 +233,6 @@ app.get('/getgenrealbums', (req, res) => {
 			snap.forEach(doc => {
 				const data = doc.data();
 
-				//console.log(data.artist + ' ' + req.params.uid);
 				if (data.genre === req.query.genre) {
 					const album = {
 						id: doc.id,
@@ -223,7 +247,6 @@ app.get('/getgenrealbums', (req, res) => {
 					albums.push(album);
 				}
 				if (i === snap.docs.length - 1) {
-					//	console.log(albums);
 					res.status(200).send(albums);
 				}
 				i++;
@@ -268,7 +291,6 @@ app.get('/getallalbums', (req, res) => {
 				};
 				albums.push(album);
 				if (i === snap.docs.length - 1) {
-					//	console.log(albums);
 					res.status(200).send(albums);
 				}
 				i++;
