@@ -220,30 +220,31 @@ app.get('/getuseralbums', (req, res) => {
 		.get()
 		.then(snap => {
 			let i = 0;
-			if (snap.length === 0) {
-				res.status(200).send([]);
+			if (snap.empty) {
+				res.status(200).send(albums);
+			} else {
+				snap.forEach(doc => {
+					const data = doc.data();
+
+					if (data.artist === req.query.uid) {
+						const album = {
+							id: doc.id,
+							coverImage: data.album_cover,
+							albumName: data.album_name,
+							songCount: data.song_count,
+							genre: data.genre,
+							artist: data.artist,
+							artistName: data.artist_name,
+						};
+
+						albums.push(album);
+					}
+					if (i === snap.docs.length - 1) {
+						res.status(200).send(albums);
+					}
+					i++;
+				});
 			}
-			snap.forEach(doc => {
-				const data = doc.data();
-
-				if (data.artist === req.query.uid) {
-					const album = {
-						id: doc.id,
-						coverImage: data.album_cover,
-						albumName: data.album_name,
-						songCount: data.song_count,
-						genre: data.genre,
-						artist: data.artist,
-						artistName: data.artist_name,
-					};
-
-					albums.push(album);
-				}
-				if (i === snap.docs.length - 1) {
-					res.status(200).send(albums);
-				}
-				i++;
-			});
 			return;
 		})
 		.catch(err => {
@@ -253,29 +254,33 @@ app.get('/getuseralbums', (req, res) => {
 
 app.get('/getalbumsongs', (req, res) => {
 	let songs = [];
-
+	console.log(req.query.currentAlbumID);
 	db.collection('albums')
 		.doc(req.query.currentAlbumID)
 		.collection('songs')
 		.get()
 		.then(snap => {
 			let i = 0;
-			if (snap.length === 0) {
-				res.status(200).send([]);
+			console.log();
+			if (snap.empty) {
+				console.log('empty');
+				res.status(200).send(songs);
+			} else {
+				console.log('not empty');
+				snap.forEach(doc => {
+					data = doc.data();
+					const song = {
+						songUrl: data.songUrl,
+						id: doc.id,
+						songName: data.songName,
+					};
+					songs.push(song);
+					if (i === snap.docs.length - 1) {
+						res.status(200).send(songs);
+					}
+					i++;
+				});
 			}
-			snap.forEach(doc => {
-				data = doc.data();
-				const song = {
-					songUrl: data.songUrl,
-					id: doc.id,
-					songName: data.songName,
-				};
-				songs.push(song);
-				if (i === snap.docs.length - 1) {
-					res.status(200).send(songs);
-				}
-				i++;
-			});
 			return;
 		})
 		.catch(err => {
@@ -290,30 +295,31 @@ app.get('/getgenrealbums', (req, res) => {
 		.get()
 		.then(snap => {
 			let i = 0;
-			if (snap.length === 0) {
-				res.status(200).send([]);
+			if (snap.empty) {
+				res.status(200).send(albums);
+			} else {
+				snap.forEach(doc => {
+					const data = doc.data();
+
+					if (data.genre === req.query.genre) {
+						const album = {
+							id: doc.id,
+							coverImage: data.album_cover,
+							albumName: data.album_name,
+							songCount: data.song_count,
+							genre: data.genre,
+							artist: data.artist,
+							artistName: data.artist_name,
+						};
+
+						albums.push(album);
+					}
+					if (i === snap.docs.length - 1) {
+						res.status(200).send(albums);
+					}
+					i++;
+				});
 			}
-			snap.forEach(doc => {
-				const data = doc.data();
-
-				if (data.genre === req.query.genre) {
-					const album = {
-						id: doc.id,
-						coverImage: data.album_cover,
-						albumName: data.album_name,
-						songCount: data.song_count,
-						genre: data.genre,
-						artist: data.artist,
-						artistName: data.artist_name,
-					};
-
-					albums.push(album);
-				}
-				if (i === snap.docs.length - 1) {
-					res.status(200).send(albums);
-				}
-				i++;
-			});
 			return;
 		})
 		.catch(err => {
