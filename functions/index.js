@@ -220,6 +220,9 @@ app.get('/getuseralbums', (req, res) => {
 		.get()
 		.then(snap => {
 			let i = 0;
+			if (snap.length === 0) {
+				res.status(200).send([]);
+			}
 			snap.forEach(doc => {
 				const data = doc.data();
 
@@ -256,8 +259,10 @@ app.get('/getalbumsongs', (req, res) => {
 		.collection('songs')
 		.get()
 		.then(snap => {
-			console.log('found list of songs');
 			let i = 0;
+			if (snap.length === 0) {
+				res.status(200).send([]);
+			}
 			snap.forEach(doc => {
 				data = doc.data();
 				const song = {
@@ -285,6 +290,9 @@ app.get('/getgenrealbums', (req, res) => {
 		.get()
 		.then(snap => {
 			let i = 0;
+			if (snap.length === 0) {
+				res.status(200).send([]);
+			}
 			snap.forEach(doc => {
 				const data = doc.data();
 
