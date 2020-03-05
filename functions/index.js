@@ -66,7 +66,6 @@ app.post('/uploadsong', (req, res) => {
 			songUrl: req.body.songUrl,
 		})
 		.then(() => {
-			res.status(200).send('success');
 			getcount();
 			return;
 		})
@@ -88,10 +87,18 @@ app.post('/uploadsong', (req, res) => {
 	};
 
 	const addCount = count => {
+		const updatedCount = count + 1;
 		db.collection('albums')
 			.doc(req.body.currentAlbum)
 			.update({
-				song_count: count++,
+				song_count: updatedCount,
+			})
+			.then(() => {
+				res.status(200).send('song uploaded successfully');
+				return;
+			})
+			.catch(err => {
+				res.status(500).send(err);
 			});
 	};
 });
@@ -254,19 +261,15 @@ app.get('/getuseralbums', (req, res) => {
 
 app.get('/getalbumsongs', (req, res) => {
 	let songs = [];
-	console.log(req.query.currentAlbumID);
 	db.collection('albums')
 		.doc(req.query.currentAlbumID)
 		.collection('songs')
 		.get()
 		.then(snap => {
 			let i = 0;
-			console.log();
 			if (snap.empty) {
-				console.log('empty');
 				res.status(200).send(songs);
 			} else {
-				console.log('not empty');
 				snap.forEach(doc => {
 					data = doc.data();
 					const song = {
@@ -396,6 +399,17 @@ app.get('/getallartists', (req, res) => {
 		})
 		.catch(err => {
 			res.status(500).send(err);
+		});
+});
+
+app.post('/getallartists', (req, res) => {
+	db.collection('artists')
+		.doc(req.body.uid)
+		.create({
+			uID: req.body.uid,
+			artist_image:
+				'https://firebasestorage.googleapis.com/v0/b/dotify-eb26e.appspot.com/o/placeholderImages%2Fdefault-artist.png?alt=media&token=7e78fb96-2b8a-436c-85e5-fc35e6a0ff53',
+			account_created: false,
 		});
 });
 
